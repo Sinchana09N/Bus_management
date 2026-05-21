@@ -42,6 +42,10 @@ CROWD_LEVELS = [
 class Bus(models.Model):
 
     bus_number = models.CharField(max_length=20)
+    
+    capacity = models.IntegerField(default=50)
+
+    current_passengers = models.IntegerField(default=0)
 
     crowd_level = models.CharField(
         max_length=20,
@@ -135,6 +139,36 @@ class Ticket(models.Model):
     journey_date = models.DateField()
 
     created_at = models.DateTimeField(auto_now_add=True)
+        def save(self, *args, **kwargs):
+
+        is_new = self.pk is None
+
+        super().save(*args, **kwargs)
+
+        if is_new:
+
+            if not hasattr(self.bus, 'current_passengers'):
+                self.bus.current_passengers = 0
+
+            self.bus.current_passengers += 1
+
+            percentage = (
+                self.bus.current_passengers / 50
+            ) * 100
+
+            if percentage <= 25:
+                self.bus.crowd_level = 'low'
+
+            elif percentage <= 50:
+                self.bus.crowd_level = 'medium'
+
+            elif percentage <= 80:
+                self.bus.crowd_level = 'high'
+
+            else:
+                self.bus.crowd_level = 'crowded'
+
+            self.bus.save()
 # class Payment(models.Model):
 #     PAYMENT_METHODS = [
 #         ('Cash', 'Cash'),
