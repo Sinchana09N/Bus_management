@@ -75,31 +75,3 @@ def bus_schedule_list(request):
 
     return render(request, 'bus_schedule_list.html', context)
     
-def save(self, *args, **kwargs):
-
-    is_new = self.pk is None
-
-    super().save(*args, **kwargs)
-
-    if is_new:
-
-        self.bus.current_passengers += 1
-
-        percentage = (
-            self.bus.current_passengers /
-            self.bus.capacity
-        ) * 100
-
-        if percentage <= 25:
-            self.bus.crowd_level = 'low'
-
-        elif percentage <= 50:
-            self.bus.crowd_level = 'medium'
-
-        elif percentage <= 80:
-            self.bus.crowd_level = 'high'
-
-        else:
-            self.bus.crowd_level = 'crowded'
-
-        self.bus.save()
